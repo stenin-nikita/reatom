@@ -1,0 +1,31 @@
+{
+  "parser": "babel-eslint",
+
+  "plugins": ["jest", "prettier"],
+
+  "extends": [
+    "airbnb-base",
+    "plugin:prettier/recommended"
+  ],
+
+  "rules": {
+    "no-param-reassign": "off",
+    "no-prototype-builtins": "off",
+    "no-void": "off",
+    "no-plusplus": "off",
+    "no-underscore-dangle": "off",
+    "prettier/prettier": "error",
+    "class-methods-use-this": "off",
+    "prefer-destructuring": "warn",
+    "consistent-return": "off",
+    "import/prefer-default-export": "off",
+    "no-continue": "off",
+    "no-return-assign": "off",
+    "no-sequences": "off",
+    "no-unused-vars": "warn"
+  },
+
+  "env": {
+    "jest/globals": true
+  }
+}

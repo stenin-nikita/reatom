@@ -1,0 +1,68 @@
+{
+  "name": "@reatom/core",
+  "private": false,
+  "version": "1.0.0-rc12",
+  "description": "State manager with a focus of all needs",
+  "source": "src/index.ts",
+  "main": "build/index.js",
+  "umd:main": "build/index.umd.js",
+  "module": "build/index.es.js",
+  "unpkg": "build/index.umd.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "npm run rebuild && npm run test",
+    "postpublish": "npm run clean",
+    "build": "cross-env fixme=fixme ../../node_modules/.bin/microbundle --external=react,@reatom/core",
+    "clean": "cross-env fixme=fixme ../../node_modules/.bin/rimraf build/",
+    "rebuild": "npm run clean && npm run build",
+    "test": "cross-env fixme=fixme ../../node_modules/.bin/jest",
+    "test:watch": "cross-env fixme=fixme ../../node_modules/.bin/jest --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "bench": "npm run rebuild && npm run bench:now && npm run clean",
+    "bench:now": "cross-env fixme=fixme ../../node_modules/.bin/ts-node -P src/benchmark/tsconfig.json src/benchmark",
+    "show-perf": "node ./tools/showPerfResults",
+    "prettify": "cross-env fixme=fixme ../../node_modules/.bin/prettier --write '**/*.ts'",
+    "prettify:watch": "cross-env fixme=fixme../../node_modules/.bin/onchange '**/*.{j,t}s' -- prettier --write {{changed}}",
+    "ts-check": "cross-env fixme=fixme ../../node_modules/.bin/tsc --noEmit",
+    "ts-check:watch": "npm run ts-check -- --watch",
+    "update": "npx npm-check-updates -u"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.1",
+    "effector": "^20.1.2",
+    "redux": "^4.0.4",
+    "reselect": "^4.0.0",
+    "ts-node": "^8.3.0"
+  },
+  "author": "artalar",
+  "license": "MIT",
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/artalar/reatom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/artalar/reatom/issues"
+  },
+  "homepage": "https://artalar.github.io/reatom",
+  "keywords": [
+    "state",
+    "store",
+    "flux",
+    "atom",
+    "reactive",
+    "reactivity",
+    "redux",
+    "effector",
+    "mobx",
+    "state-manager",
+    "state manager",
+    "reatom"
+  ],
+  "files": [
+    "/README.md",
+    "/package.json",
+    "/src/index.ts",
+    "/build"
+  ]
+}
