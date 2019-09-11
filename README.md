@@ -23,18 +23,30 @@ ReAtom is **declarative** and **reactive** state manager, designed for both simp
 
 ## Goals and features
 
-- 🐣 **simple abstraction** and friendly DX: minimum boilerplate and tiny API
-- ❗️ **static typed**: best type inference
-- ⚡ **performance**: light tiny updates in huge state
-- 🗜 **small size**: [2 KB](https://bundlephobia.com/result?p=@reatom/core) gzipped
-- 📦 **modular**: reusable instances (SSR)
-- 🍴 **lazy**: solution for code splitting out of the box
-- 🧪 **testing**: simple mocking
-- 🛠 **debugging**: immutable data, devtools (redux ecosystem support by adapter)
-- 🔮 **deterministic**: declarative and predictable specification of state shape and its mutations
-- 👴 **ES5 support** (by polyfills)
-- synchronous [glitch](https://stackoverflow.com/questions/25139257/terminology-what-is-a-glitch-in-functional-reactive-programming-rx) free: resolve [diamond problem](https://github.com/artalar/reatom/blob/master/src/__tests__/diamond.ts)
-- simple integration with other libraries (Observable, redux ecosystem, etc)
+- 🐣 **simple abstraction** 
+  > friendly DX: minimum boilerplate and tiny API
+- ❗️ **static typed**
+  > best type inference
+- ⚡ **performance**
+  > light tiny updates in huge state
+- 🗜 **small size**
+  > [2 KB](https://bundlephobia.com/result?p=@reatom/core) gzipped
+- 📦 **modular**
+  > reusable instances (SSR)
+- 🍴 **lazy**
+  > solution for code splitting out of the box
+- 🧪 **testing**
+  > simple mocking
+- 🛠 **debugging**
+  > immutable data, devtools (redux ecosystem support by adapter)
+- 🔮 **deterministic**
+  > declarative and predictable specification of state shape and its mutations
+- 👴 **ES5 support** 
+  > by polyfills
+- synchronous [glitch](https://stackoverflow.com/questions/25139257/terminology-what-is-a-glitch-in-functional-reactive-programming-rx) free
+  > resolve [diamond problem](https://github.com/artalar/reatom/blob/master/src/__tests__/diamond.ts)
+- simple integration with other libraries
+  > Observable, redux ecosystem, etc
 - awkward for write bad code
 - handy for write good code
 
