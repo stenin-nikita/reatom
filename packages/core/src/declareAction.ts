@@ -6,6 +6,7 @@ export type ActionType = Leaf
 export type Action<Payload, Type extends ActionType = string> = {
   type: Type
   payload: Payload
+  key?: string | number
 }
 
 export type ActionCreator<Payload = undefined, Type extends string = string> = {
@@ -13,7 +14,7 @@ export type ActionCreator<Payload = undefined, Type extends string = string> = {
   [TREE]: Tree
 } & (Payload extends undefined
   ? () => Action<Payload, Type>
-  : (payload: Payload) => Action<Payload, Type>)
+  : (payload: Payload, key?: string | number) => Action<Payload, Type>)
 
 export function declareAction<
   Payload = undefined,
@@ -24,10 +25,11 @@ export function declareAction<
   const ACTree = new Tree(id, true)
   ACTree.addFn(noop, id)
 
-  function actionCreator(payload?: Payload) {
+  function actionCreator(payload?: Payload, key?: string | number) {
     return {
       type: id,
       payload,
+      key,
     }
   }
 

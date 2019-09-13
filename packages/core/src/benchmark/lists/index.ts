@@ -73,17 +73,11 @@ const suites = [
     initializeStore: RA.initializeStore,
     fetchAddressesDone: RA.fetchAddressesDone,
     subscribe(store, id, logList: number[]) {
-      store.subscribe(RA.declareCitiesCell(id), () =>
-        logList.push(Math.random()),
-      )
+      store.subscribe(RA.Cities, id, () => logList.push(Math.random()))
 
-      store.subscribe(RA.declareStreetsCell(id), () =>
-        logList.push(Math.random()),
-      )
+      store.subscribe(RA.Streets, id, () => logList.push(Math.random()))
 
-      store.subscribe(RA.declareHousesCell(id), () =>
-        logList.push(Math.random()),
-      )
+      store.subscribe(RA.Houses, id, () => logList.push(Math.random()))
     },
     subscribeToInput(store, logList: number[]) {
       store.subscribe(RA.Input, () => logList.push(Math.random()))
@@ -144,7 +138,7 @@ function bench({
   )
 
   log(type, `change one item [1]`, () =>
-    store.dispatch(changeHouse({ id: getId(0), value: 100 })),
+    store.dispatch(changeHouse({ id: getId(0), value: 100 }, getId(0))),
   )
 
   log(type, `subscribe to ${(ITEMS / 2) * 3} items [2]`, () =>
@@ -160,14 +154,16 @@ function bench({
   )
 
   log(type, `change one item [2]`, () =>
-    store.dispatch(changeHouse({ id: getId(0), value: 110 })),
+    store.dispatch(changeHouse({ id: getId(0), value: 110 }, getId(0))),
   )
 
   // here "input" is independent part of store with minimum dependencies
   log(type, `change input`, () => store.dispatch(changeInput('input')))
 
   log(type, `change step by step ${ITEMS} items`, () =>
-    repeat(i => store.dispatch(changeHouse({ id: getId(i), value: 10 + i }))),
+    repeat(i =>
+      store.dispatch(changeHouse({ id: getId(i), value: 10 + i }, getId(i))),
+    ),
   )
 
   writeLog({ type, name: 'subscriptions calls', result: logList.length })
@@ -211,67 +207,67 @@ export const displayResult = () => {
 }
 
 // Build "core" to build:
-//        1854 B: index.js.gz
-//        1695 B: index.js.br
-//        1856 B: index.es.js.gz
-//        1705 B: index.es.js.br
-//        1907 B: index.umd.js.gz
-//        1752 B: index.umd.js.br
+//        2034 B: index.js.gz
+//        1870 B: index.js.br
+//        2050 B: index.es.js.gz
+//        1886 B: index.es.js.br
+//        2094 B: index.umd.js.gz
+//        1925 B: index.umd.js.br
 
 // Average from 200 items; 400 times
 
 // create store
-// redux: 0.020ms
-// reatom: 0.054ms
+// redux: 0.019ms
+// reatom: 0.048ms
 
 // dispatch unknown action [1]
-// redux: 0.004ms
+// redux: 0.005ms
 // reatom: 0.001ms
 
 // set 200 items
-// redux: 0.003ms
+// redux: 0.005ms
 // reatom: 0.010ms
 
 // subscribe to 300 items [1]
-// redux: 0.727ms
-// reatom: 2.847ms
+// redux: 0.873ms
+// reatom: 0.378ms
 
 // subscribe to input
-// redux: 0.006ms
-// reatom: 0.002ms
+// redux: 0.005ms
+// reatom: 0.001ms
 
 // dispatch unknown action [2]
-// redux: 0.046ms
+// redux: 0.050ms
 // reatom: 0.001ms
 
 // dispatch unknown action [3]
-// redux: 0.023ms
+// redux: 0.021ms
 // reatom: 0.000ms
 
 // change one item [1]
-// redux: 0.274ms
-// reatom: 0.195ms
+// redux: 0.316ms
+// reatom: 0.129ms
 
 // subscribe to 300 items [2]
-// redux: 0.680ms
-// reatom: 2.495ms
+// redux: 0.624ms
+// reatom: 0.356ms
 
 // dispatch unknown action [4]
-// redux: 0.077ms
+// redux: 0.081ms
 // reatom: 0.001ms
 
 // dispatch unknown action [5]
-// redux: 0.042ms
+// redux: 0.052ms
 // reatom: 0.000ms
 
 // change one item [2]
-// redux: 0.463ms
-// reatom: 0.261ms
+// redux: 0.498ms
+// reatom: 0.117ms
 
 // change input
-// redux: 0.338ms
-// reatom: 0.007ms
+// redux: 0.341ms
+// reatom: 0.005ms
 
 // change step by step 200 items
-// redux: 118.191ms
-// reatom: 45.304ms
+// redux: 115.185ms
+// reatom: 21.521ms

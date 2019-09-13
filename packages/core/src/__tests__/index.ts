@@ -125,6 +125,39 @@ describe('@reatom/core', () => {
         '[reatom] Invalid state. Reducer № 2 in "test" atom returns undefined',
       )
     })
+    test('declareAtom lense', () => {
+      const changeItemValue = declareAction<string>()
+      const listLensedAtom = declareAtom(['1'], (on, lens) => [
+        lens(changeItemValue, (el, value) => value),
+      ])
+      let state = listLensedAtom()
+      expect(state).toEqual({
+        [getTree(listLensedAtom).id]: ['1'],
+      })
+      state = listLensedAtom(state, changeItemValue('_1_', 0))
+      expect(state).toEqual({
+        [getTree(listLensedAtom).id]: ['_1_'],
+        [getTree(listLensedAtom).id + 0]: '_1_',
+      })
+    })
+    test('declareAtom lense custom', () => {
+      const changeItemValue = declareAction<string>()
+      const mapLensedAtom = declareAtom(new Map([[1, '1']]), (on, lens) => [
+        lens(changeItemValue, (el, value) => value, {
+          get: (state, key: number) => state.get(key) as string,
+          set: (state, key: number, value) => new Map(state).set(key, value),
+        }),
+      ])
+      let state = mapLensedAtom()
+      expect(state).toEqual({
+        [getTree(mapLensedAtom).id]: new Map([[1, '1']]),
+      })
+      state = mapLensedAtom(state, changeItemValue('_1_', 1))
+      expect(state).toEqual({
+        [getTree(mapLensedAtom).id]: new Map([[1, '_1_']]),
+        [getTree(mapLensedAtom).id + 1]: '_1_',
+      })
+    })
     test('createStore', () => {
       const increment = declareAction('increment')
       const toggle = declareAction()
@@ -404,6 +437,40 @@ describe('@reatom/core', () => {
       })
       expect(storeWithPreloadedState.getState(staticCount)).toBe(1)
       expect(storeWithPreloadedState.getState(dynamicCount)).toBe(2)
+    })
+    test('createStore subscribe lense', () => {
+      const setNewList = declareAction<number[]>()
+      const changeItemValue = declareAction<number>()
+      const listLensedAtom = declareAtom([1, 2, 3], (on, lens) => [
+        on(setNewList, (state, value) => value),
+        lens(changeItemValue, (el, value) => value),
+      ])
+
+      const store = createStore(listLensedAtom)
+      const cbList = jest.fn()
+      const cbElem = jest.fn()
+      store.subscribe(listLensedAtom, cbList)
+      store.subscribe(listLensedAtom, 1, cbElem)
+
+      store.dispatch(changeItemValue(1.1, 0))
+      expect(store.getState(listLensedAtom)).toEqual([1.1, 2, 3])
+      expect(cbList).toBeCalledTimes(1)
+      expect(cbList).toBeCalledWith([1.1, 2, 3])
+      expect(cbElem).toBeCalledTimes(0)
+
+      store.dispatch(changeItemValue(2.1, 1))
+      expect(store.getState(listLensedAtom)).toEqual([1.1, 2.1, 3])
+      expect(cbList).toBeCalledTimes(2)
+      expect(cbList).toBeCalledWith([1.1, 2.1, 3])
+      expect(cbElem).toBeCalledTimes(1)
+      expect(cbElem).toBeCalledWith(2.1)
+
+
+      store.dispatch(setNewList([1.2, 2.2, 3.2]))
+      expect(cbList).toBeCalledTimes(3)
+      expect(cbList).toBeCalledWith([1.1, 2.1, 3])
+      expect(cbElem).toBeCalledTimes(2)
+      expect(cbElem).toBeCalledWith(2.2)
     })
   })
   describe('derived state', () => {

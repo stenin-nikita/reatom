@@ -22,6 +22,11 @@ declare function storeGetState(): State
 
 declare function storeSubscribe<T>(
   target: Atom<T>,
+  key: string | number,
+  listener: (state: T) => any,
+): () => void
+declare function storeSubscribe<T>(
+  target: Atom<T>,
   listener: (state: T) => any,
 ): () => void
 declare function storeSubscribe(
@@ -67,7 +72,9 @@ export function createStore(
   }
 
   // @ts-ignore
-  function subscribe(target, cb) {
+  function subscribe(target, key, cb) {
+    const isLens = !!cb
+    if (!isLens) cb = key
     const isActionSubscription = cb === undefined
     const listener = safetyFunc(isActionSubscription ? target : cb, 'listener')
     let isSubscribed = true
@@ -84,7 +91,8 @@ export function createStore(
 
     if (!getIsAtom(target)) throwError('Subscription target is not Atom')
     const targetTree = getTree(target)
-    const targetId = targetTree.id
+    let targetId = targetTree.id
+    if (isLens) targetId = targetId + key
     const isLazy = !initialAtoms.has(targetId)
 
     if (!listenersStore.has(targetId)) {

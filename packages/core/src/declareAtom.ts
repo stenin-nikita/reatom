@@ -9,7 +9,12 @@ import {
   getIsAction,
   assign,
 } from './shared'
-import { Action, declareAction, ActionType } from './declareAction'
+import {
+  Action,
+  declareAction,
+  ActionType,
+  ActionCreator,
+} from './declareAction'
 
 const DEPS = Symbol('@@Reatom/DEPS')
 
@@ -23,14 +28,38 @@ export type Atom<T> = {
   [DEPS]: TreeId[]
 }
 
+type Lens<T, El> = {
+  get: (state: T, key: string | number) => El
+  set: (state: T, key: string | number, value: El) => T
+}
+
+const lensDefault: Lens<any[] | Record<any, any>, any> = {
+  // @ts-ignore
+  get: (state, key) => state[key],
+  set: (state, key, value) => (
+    (state = Array.isArray(state) ? state.slice(0) : assign({}, state)),
+    (state[key] = value),
+    state
+  ),
+}
+
+function identity<T>(a: T, ..._a: any[]): T {
+  return a
+}
+
 // @ts-ignore
 export declare function declareAtom<State>(
   name: string | [TreeId],
   initialState: State,
   dependencyMatcher: (
-    reduce: <T>(
+    on: <T>(
       dependency: Unit<T>,
       reducer: (state: State, value: T) => State,
+    ) => void,
+    lens: <T, El>(
+      dependency: ActionCreator<T>,
+      reducer: (value: El, payload: T) => El,
+      lenses?: Lens<State, El>,
     ) => void,
   ) => any,
 ): Atom<State>
@@ -38,9 +67,14 @@ export declare function declareAtom<State>(
 export declare function declareAtom<State>(
   initialState: State,
   dependencyMatcher: (
-    reduce: <T>(
+    on: <T>(
       dependency: Unit<T>,
       reducer: (state: State, value: T) => State,
+    ) => void,
+    lens: <T, El>(
+      dependency: ActionCreator<T>,
+      reducer: (value: El, payload: T) => El,
+      lenses?: Lens<State, El>,
     ) => void,
   ) => any,
 ): Atom<State>
@@ -48,7 +82,7 @@ export function declareAtom<State>(
   name: string | [TreeId],
   initialState: State,
   dependencyMatcher: (
-    reduce: <T>(
+    on: <T>(
       dependency: Unit<T>,
       reducer: (state: State, value: T) => State | undefined,
     ) => void,
@@ -73,9 +107,10 @@ export function declareAtom<State>(
   if (initialState === undefined)
     throwError(`Atom "${_id}". Initial state can't be undefined`)
 
-  function reduce<T>(
+  function on<T>(
     dep: Unit<T>,
     reducer: (state: State, payload: T) => State | undefined,
+    lens?: Lens<State, unknown>,
   ) {
     if (!initialPhase)
       throwError("Can't define dependencies after atom initialization")
@@ -87,8 +122,20 @@ export function declareAtom<State>(
     safetyFunc(reducer, 'reducer')
 
     const isDepActionCreator = getIsAction(dep)
+    const isLens = Boolean(lens)
 
     _tree.union(depTree)
+
+    let get = identity
+    let set = identity
+    if (isLens) {
+      if (!isDepActionCreator)
+        throwError("Can't depends from atoms in lens, use declared action")
+      // @ts-ignore
+      get = lens.get
+      // @ts-ignore
+      set = lens.set
+    }
 
     if (isDepActionCreator) _tree.addFn(update, depId)
     else {
@@ -98,7 +145,7 @@ export function declareAtom<State>(
       depTree.fnsMap.forEach((_, key) => _tree.addFn(update, key))
     }
 
-    function update({ state, stateNew, payload, changedIds, type }: Ctx) {
+    function update({ state, stateNew, payload, changedIds, type, key }: Ctx) {
       const atomStateSnapshot = state[_id]
       // first `walk` of lazy (dynamically added by subscription) atom
       const isAtomLazy = atomStateSnapshot === undefined
@@ -121,7 +168,18 @@ export function declareAtom<State>(
       const depValue = isDepActionCreator ? payload : depState
 
       if (isDepActionCreator || isDepChanged || isAtomLazy) {
-        const atomStateNew = reducer(atomState, depValue)
+        let isAtomStateLensedChange = false
+        let atomStateLensedNew
+        let atomStateNew
+
+        if (isLens) {
+          const atomStateLensed = get(atomState, key)
+          atomStateLensedNew = reducer(atomStateLensed, depValue)
+          isAtomStateLensedChange = atomStateLensed !== atomStateLensedNew
+          atomStateNew = set(atomState, key, atomStateLensedNew)
+        } else {
+          atomStateNew = reducer(atomState, depValue)
+        }
 
         if (atomStateNew === undefined)
           throwError(
@@ -131,13 +189,24 @@ export function declareAtom<State>(
         if (atomStateNew !== atomState) {
           stateNew[_id] = atomStateNew
           if (!hasAtomNewState) changedIds.push(_id)
+          if (isLens && isAtomStateLensedChange) {
+            const id = _id + key
+            stateNew[id] = atomStateLensedNew
+            changedIds.push(id)
+          }
         }
       }
     }
   }
 
-  reduce(_initAction, (state = initialState) => state)
-  dependencyMatcher(reduce)
+  on(_initAction, (state = initialState) => state)
+
+  dependencyMatcher(
+    // @ts-ignore
+    (dependency, reducer) => on(dependency, reducer),
+    // @ts-ignore
+    (dependency, reducer, lens = lensDefault) => on(dependency, reducer, lens),
+  )
 
   function atom(
     state: Ctx['state'] = {},
@@ -189,7 +258,7 @@ export function map(name, target, mapper) {
     name,
     // FIXME: initialState for `map` :thinking:
     null,
-    reduce => reduce(target, (state, payload) => mapper(payload)),
+    on => on(target, (state, payload) => mapper(payload)),
   )
 }
 

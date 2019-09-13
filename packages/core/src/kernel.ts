@@ -6,13 +6,14 @@ export type Fn = (ctx: Ctx) => any
 export type Ctx = ReturnType<typeof createCtx>
 export function createCtx(
   state: State,
-  { type, payload }: { type: Leaf; payload: any },
+  { type, payload, key }: { type: Leaf; payload: any; key?: string | number },
 ) {
   return {
     state,
     stateNew: {} as State,
     type,
     payload,
+    key,
     changedIds: [] as TreeId[],
   }
 }
