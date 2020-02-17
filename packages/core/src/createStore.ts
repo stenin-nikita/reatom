@@ -24,7 +24,7 @@ type GetStateFunction = {
 }
 
 export type Store = {
-  dispatch: (action: Action<unknown>) => void
+  dispatch: <T = unknown>(action: Action<T>) => void
   subscribe: SubscribeFunction
   getState: GetStateFunction
   bind: <A extends (...a: any[]) => BaseAction>(

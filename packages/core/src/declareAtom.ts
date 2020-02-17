@@ -16,7 +16,9 @@ import { Action, declareAction, PayloadActionCreator } from './declareAction'
 const DEPS = Symbol('@@Reatom/DEPS')
 
 // action for set initialState of each atom to global state
-const initActionCreator = declareAction(['@@Reatom/init'])
+const initActionCreator = declareAction<State | void, '@@Reatom/init'>([
+  '@@Reatom/init',
+])
 export const initAction = initActionCreator()
 
 type AtomName = TreeId | [string]
@@ -132,8 +134,7 @@ export function declareAtom<TState>(
     depTree.fnsMap.forEach((_, key) => _tree.addFn(update, key))
   }
 
-  // @ts-ignore
-  on(initActionCreator, (_, { [_id]: state = initialState } = {}) => state)
+  on(initActionCreator, (_, { [_id]: state = initialState }: any = {}) => state)
   dependencyMatcher(on)
 
   const atom = function atom(
@@ -184,8 +185,7 @@ export function map<T, TSource = unknown>(
     // FIXME: initialState for `map` :thinking:
     null as any,
     handle =>
-      //@ts-ignore
-      handle(source as Atom<TSource>, (state, payload) => mapper(payload)),
+      handle(source as Atom<TSource>, (state, payload) => mapper!(payload)),
   )
 }
 
@@ -222,8 +222,7 @@ export function combine<T extends AtomsMap | TupleOfAtoms>(
 
   return declareAtom(name as AtomName, isArray ? [] : {}, reduce =>
     keys.forEach(key =>
-      //@ts-ignore
-      reduce(shape[key], (state, payload) => {
+      reduce((shape as any)[key], (state, payload) => {
         const newState: any = isArray
           ? (state as any[]).slice(0)
           : assign({}, state)

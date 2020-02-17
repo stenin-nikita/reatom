@@ -1,12 +1,10 @@
-import { initAction, Store, Action } from '@reatom/core'
+import { initAction, Store } from '@reatom/core'
 
 // http://extension.remotedev.io/docs/API/Methods.html#connect
 export function connectReduxDevtools(store: Store, config = {}) {
   const devTools =
-    // @ts-ignore
-    window.__REDUX_DEVTOOLS_EXTENSION__ &&
-    // @ts-ignore
-    window.__REDUX_DEVTOOLS_EXTENSION__.connect(config)
+    (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
+    (window as any).__REDUX_DEVTOOLS_EXTENSION__.connect(config)
 
   if (!devTools) return
 
@@ -17,7 +15,6 @@ export function connectReduxDevtools(store: Store, config = {}) {
   devTools.subscribe((action: any) => {
     if (action.type === 'DISPATCH') {
       // TODO: improve action types
-      // @ts-ignore
       store.dispatch({ ...initAction, payload: JSON.parse(action.state) })
     }
   })

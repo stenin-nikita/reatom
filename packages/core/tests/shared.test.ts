@@ -10,7 +10,6 @@ describe('@reatom/core', () => {
 
       expect(nameToId('a')).toBe('a10')
       expect(getTree(at).id).toBe('pep10')
-      //@ts-ignore
       expect(getTree(act).id).toBe('peps10')
     })
   })
