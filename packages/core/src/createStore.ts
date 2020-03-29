@@ -1,4 +1,4 @@
-import { Tree, State, TreeId, createCtx, BaseAction } from './kernel'
+import { Tree, State, TreeId, createCtx, BaseAction } from './ctx'
 import {
   throwError,
   getTree,

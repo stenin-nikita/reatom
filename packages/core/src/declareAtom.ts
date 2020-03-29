@@ -1,4 +1,4 @@
-import { Tree, State, TreeId, Ctx, createCtx, Leaf } from './kernel'
+import { Tree, State, TreeId, Ctx, createCtx, Leaf } from './ctx'
 import {
   TREE,
   nameToId,
@@ -144,7 +144,7 @@ export function declareAtom<TState>(
         }
       }
     }
-    update._ownerAtomId = _id
+    update.getId = () => _id
 
     if (isDepActionCreator) return _tree.addFn(update, depId as Leaf)
     if (_deps.has(depId)) throwError('One of dependencies has the equal id')

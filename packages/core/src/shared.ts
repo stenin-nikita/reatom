@@ -1,4 +1,4 @@
-import { Tree, TreeId } from './kernel'
+import { Tree, TreeId } from './ctx'
 import { Atom } from './declareAtom'
 import { PayloadActionCreator } from './declareAction'
 
