@@ -40,13 +40,11 @@ export function getName(treeId: TreeId): string {
 }
 
 export function getIsAtom(thing: any): thing is Atom<any> {
-  const vertex = getTree(thing)
-  return Boolean(vertex && !vertex.isLeaf)
+  return Boolean(getTree(thing))
 }
 
-export function getIsAction(thing: any): thing is Atom<any> {
-  const vertex = getTree(thing)
-  return Boolean(vertex && vertex.isLeaf)
+export function getIsAction(thing: any): thing is PayloadActionCreator<any> {
+  return isActionCreator(thing)
 }
 
 let id = 0
@@ -67,7 +65,7 @@ export function setNameToId(gen: GenId) {
   _nameToId = safetyFunc(gen, 'gen')
 }
 
-export function throwError(error: string) {
+export function throwError(error: string): never {
   // TODO: add link to docs with full description
   throw new Error(`[reatom] ${error}`)
 }
@@ -88,4 +86,16 @@ export function getOwnKeys<T extends object>(obj: T): Array<keyof T> {
   keys.push(...(Object.getOwnPropertySymbols(obj) as Array<keyof T>))
 
   return keys
+}
+
+export function isActionCreator(arg: any): arg is PayloadActionCreator<any> {
+  return typeof arg === 'function' && typeof arg.getType === 'function'
+}
+
+export function getUnitId(arg: Unit | PayloadActionCreator<any>) {
+  if (isActionCreator(arg)) {
+    return arg.getType()
+  }
+
+  return getTree(arg).id
 }

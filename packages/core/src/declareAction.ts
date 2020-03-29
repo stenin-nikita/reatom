@@ -1,5 +1,5 @@
-import { Leaf, Tree, BaseAction } from './ctx'
-import { TREE, nameToId, Unit } from './shared'
+import { Leaf, BaseAction } from './ctx'
+import { nameToId } from './shared'
 import { Store } from './createStore'
 
 export type ActionType = Leaf
@@ -14,7 +14,7 @@ export type Action<Payload, Type extends ActionType = string> = BaseAction<
 
 export type BaseActionCreator<Type extends string = string> = {
   getType: () => Type
-} & Unit
+}
 
 export type ActionCreator<Type extends string = string> = BaseActionCreator<
   Type
@@ -59,8 +59,6 @@ export function declareAction<
   }
   const id = nameToId(name)
 
-  const ACTree = new Tree(id, true)
-
   const actionCreator = function actionCreator(payload?: Payload) {
     return {
       type: id,
@@ -69,7 +67,6 @@ export function declareAction<
     }
   } as ActionCreator<Type> | PayloadActionCreator<Payload, Type>
 
-  actionCreator[TREE] = ACTree
   actionCreator.getType = () => id as Type
 
   return actionCreator

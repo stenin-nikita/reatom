@@ -12,13 +12,10 @@ export interface Fn<T = void> {
 export class Tree<TContext = void> {
   id: TreeId
 
-  isLeaf: boolean
-
   fnsMap: Map<Leaf, SetCounted<Fn<TContext>>>
 
-  constructor(id: TreeId, isLeaf = false) {
+  constructor(id: TreeId) {
     this.id = id
-    this.isLeaf = isLeaf
     this.fnsMap = new Map()
   }
 

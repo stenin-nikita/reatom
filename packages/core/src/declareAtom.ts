@@ -12,6 +12,7 @@ import {
   getName,
   equals,
   getOwnKeys,
+  getUnitId,
 } from './shared'
 import { Action, declareAction, PayloadActionCreator } from './declareAction'
 
@@ -86,13 +87,14 @@ export function declareAtom<TState>(
     safetyFunc(reducer, 'reducer')
 
     const position = dependencePosition++
-    const depTree = getTree(dep as Unit)
-    if (!depTree) throwError('Invalid dependency')
-    const depId = depTree.id
-
     const isDepActionCreator = getIsAction(dep)
+    const depTree = getTree(dep as Unit)
+    if (!isDepActionCreator && !depTree) throwError('Invalid dependency')
+    const depId = getUnitId(dep)
 
-    _tree.union(depTree)
+    if (depTree) {
+      _tree.union(depTree)
+    }
 
     const update = function update({
       state,

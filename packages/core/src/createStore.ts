@@ -7,6 +7,7 @@ import {
   getIsAtom,
   getIsAction,
   getOwnKeys,
+  getUnitId,
 } from './shared'
 import { Action, PayloadActionCreator } from './declareAction'
 import { Atom, initAction, getState } from './declareAtom'
@@ -125,8 +126,8 @@ export function createStore(
     const isAction = getIsAction(target)
     if (!getIsAtom(target) && !isAction)
       throwError('Invalid subscription target')
-    const targetTree = getTree(target as Atom<T> | PayloadActionCreator<T>)
-    const targetId = targetTree.id
+    const targetTree = getTree(target as Atom<T>)
+    const targetId = getUnitId(target as Atom<T> | PayloadActionCreator<T>)
     const isLazy = !isAction && !initialAtoms.has(targetId)
 
     ensureCanMutateNextListeners(targetId)
